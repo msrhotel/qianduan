@@ -64,3 +64,4 @@ gulp.task('default', ['clean'], function () {
     del([`${distPath}/static`, `${versionPath}/static/config`])
   })
 });
+// 测试
