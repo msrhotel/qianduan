@@ -6,6 +6,7 @@
 //
 // For more information on custom assertions see:
 // http://nightwatchjs.org/guide#writing-custom-assertions
+// hotel
 
 exports.assertion = function (selector, count) {
   this.message = 'Testing if element <' + selector + '> has count: ' + count
