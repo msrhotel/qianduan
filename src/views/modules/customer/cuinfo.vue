@@ -3,10 +3,10 @@
   <!--查询表单-->
     <el-form :inline="true" class="demo-form-inline" >
         <el-form-item >
-            <el-input  placeholder="身份证"/>
+            <el-input  v-model="searchObj.customerId" placeholder="身份证"/>
         </el-form-item>
         <el-form-item>
-            <el-input  placeholder="姓名"/>
+            <el-input  v-model="searchObj.inRoom" placeholder="入住房间号"/>
         </el-form-item>
 
       <!-- <el-form-item>
@@ -42,6 +42,7 @@
       <el-button type="default" >清空</el-button>
     </el-form>
   <el-table
+    :data="list"
     height="250"
     border
     style="width: 100%">
@@ -51,19 +52,19 @@
       label="身份证号">
     </el-table-column>
         <el-table-column
-      prop="customerinfoTel"
-      label="电话号码">
+      prop="inRoom"
+      label="入住房间号">
     </el-table-column>
-    <el-table-column
+    <!-- <el-table-column
       prop="customerinfoBirthday"
       label="出生日期"
       width="180">
-    </el-table-column>
-    <el-table-column
+    </el-table-column> -->
+    <!-- <el-table-column
       prop="customerName"
       label="姓名"
       width="180">
-    </el-table-column>
+    </el-table-column> -->
   </el-table>
     <!-- 分页 -->
     <el-pagination
@@ -76,5 +77,50 @@
     />
 </div>
 </template>
+<script>
+export default {
 
+  data () { // 定义数据
+    return {
+      listLoading: true, // 是否显示loading信息
+      list: [], // 数据列表
+      total: 0, // 总记录数
+      page: 1, // 页码
+      limit: 2, // 每页记录数
+      searchObj: {}// 查询条件
+    }
+  },
 
+  created () { // 当页面加载时获取数据
+    this.fetchData()
+  },
+
+  methods: {
+    fetchData (page = 1) { // 调用api层获取数据库中的数据
+      console.log('加载列表')
+      this.page = page
+      this.listLoading = true
+      this.$http({
+        url: this.$http.adornUrl('/hotel/customer/list'),
+        method: 'get',
+        params: this.$http.adornParams({
+          'page': this.page,
+          'limit': this.limit,
+          'searchObj': this.searchObj
+        })
+      }).then(({data}) => {
+        console.log(data)
+        if (data && data.code === 20000) {
+          this.list = data.data.cutomers
+          // this.totalPage = data.total
+          console.log(this.list)
+        } else {
+          this.dataList = []
+          this.totalPage = 0
+        }
+        this.dataListLoading = false
+      })
+    }
+  }
+}
+</script>
