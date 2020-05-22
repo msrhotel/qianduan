@@ -101,18 +101,19 @@ export default {
       this.page = page
       this.listLoading = true
       this.$http({
-        url: this.$http.adornUrl('/hotel/customer/list'),
+        url: this.$http.adornUrl(`/hotel/customer/${this.page}/${this.limit}`),
         method: 'get',
-        params: this.$http.adornParams({
-          'page': this.page,
-          'limit': this.limit,
-          'searchObj': this.searchObj
-        })
+        params: this.$http.adornParams()
+        // params: this.$http.adornParams({
+        //   'page': this.page,
+        //   'limit': this.limit,
+        //   'searchObj': this.searchObj
+        // })
       }).then(({data}) => {
         console.log(data)
         if (data && data.code === 20000) {
-          this.list = data.data.cutomers
-          // this.totalPage = data.total
+          this.list = data.data.rows
+          this.total = data.data.total
           console.log(this.list)
         } else {
           this.dataList = []
