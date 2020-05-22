@@ -9,36 +9,21 @@
             <el-input  v-model="searchObj.inRoom" placeholder="入住房间号"/>
         </el-form-item>
 
-      <!-- <el-form-item>
-        <el-select clearable placeholder="讲师头衔">
-          <el-option :value="1" label="高级讲师"/>
-          <el-option :value="2" label="首席讲师"/>
-        </el-select>
-      </el-form-item> -->
-
-        <el-form-item>
+        <!-- <el-form-item>
             <el-input  placeholder="电话号码"/>
-        </el-form-item>
+        </el-form-item>  -->
 
-      <!-- <el-form-item label="入住时间">
-        <el-date-picker
+      <el-form-item label="入住时间">
+         <el-date-picker
+          v-model="searchObj.inDate"
           type="datetime"
-          placeholder="选择开始时间"
-          value-format="yyyy-MM-dd HH:mm:ss"
-          default-time="00:00:00"
-        />
+          placeholder="选择日期时间"
+          align="right"
+          :picker-options="pickerOptions">
+        </el-date-picker>
       </el-form-item>
-      <el-form-item>
-        <el-date-picker
-          
-          type="datetime"
-          placeholder="选择截止时间"
-          value-format="yyyy-MM-dd HH:mm:ss"
-          default-time="00:00:00"
-        />
-      </el-form-item> -->
 
-      <el-button type="primary" icon="el-icon-search">查询</el-button>
+      <el-button type="primary" icon="el-icon-search" @click="fetchData()">查询</el-button>
       <el-button type="default" >清空</el-button>
     </el-form>
   <el-table
@@ -51,9 +36,25 @@
       prop="customerId"
       label="身份证号">
     </el-table-column>
-        <el-table-column
+    <el-table-column
       prop="inRoom"
       label="入住房间号">
+    </el-table-column>
+    <el-table-column
+      prop="inDate"
+      label="入住日期">
+    </el-table-column>
+    <el-table-column
+      prop="outDate"
+      label="预定退房时间">
+    </el-table-column>
+     <el-table-column
+      prop="customerRent"
+      label="收取的房费">
+    </el-table-column>
+     <el-table-column
+      prop="customerDeposit"
+      label="收取押金">
     </el-table-column>
     <!-- <el-table-column
       prop="customerinfoBirthday"
@@ -65,6 +66,14 @@
       label="姓名"
       width="180">
     </el-table-column> -->
+     <el-table-column label="操作" width="200" align="center">
+        <template slot-scope="scope">
+          <!-- <router-link :to="'/cutomer/edit/'+scope.row.customerId"> -->
+            <el-button type="primary" size="mini" icon="el-icon-edit" @click="addOrUpdateHandle(scope.row.customerId)">修改</el-button>
+          <!-- </router-link> -->
+          <el-button type="danger" size="mini" icon="el-icon-delete" @click="removeDataById(scope.row.customerId)">删除</el-button>
+        </template>
+      </el-table-column>
   </el-table>
     <!-- 分页 -->
     <el-pagination
@@ -75,11 +84,13 @@
       layout="total, prev, pager, next, jumper"
       @current-change="fetchData"
     />
+     <!-- 弹窗, 新增 / 修改 -->
+    <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="fetchData"></add-or-update>
 </div>
 </template>
 <script>
+import AddOrUpdate from './add-or-update'
 export default {
-
   data () { // 定义数据
     return {
       listLoading: true, // 是否显示loading信息
@@ -87,27 +98,53 @@ export default {
       total: 0, // 总记录数
       page: 1, // 页码
       limit: 2, // 每页记录数
-      searchObj: {}// 查询条件
+      searchObj: {}, // 查询条件
+      pickerOptions: {
+        shortcuts: [{
+          text: '今天',
+          onClick (picker) {
+            picker.$emit('pick', new Date())
+          }
+        }, {
+          text: '昨天',
+          onClick (picker) {
+            const date = new Date()
+            date.setTime(date.getTime() - 3600 * 1000 * 24)
+            picker.$emit('pick', date)
+          }
+        }, {
+          text: '一周前',
+          onClick (picker) {
+            const date = new Date()
+            date.setTime(date.getTime() - 3600 * 1000 * 24 * 7)
+            picker.$emit('pick', date)
+          }
+        }]
+      },
+      addOrUpdateVisible: false
     }
   },
-
-  created () { // 当页面加载时获取数据
+  activated () { // 当页面加载时获取数据
     this.fetchData()
   },
-
+  components: {
+    AddOrUpdate
+  },
   methods: {
     fetchData (page = 1) { // 调用api层获取数据库中的数据
       console.log('加载列表')
+      console.log(this.searchObj)
       this.page = page
       this.listLoading = true
       this.$http({
         url: this.$http.adornUrl(`/hotel/customer/${this.page}/${this.limit}`),
         method: 'get',
-        params: this.$http.adornParams()
+        params: this.$http.adornParams(this.searchObj)
+        // data: this.$http.adornData(
+        //   {'CustomerQuery': this.searchObj}
+        // )
         // params: this.$http.adornParams({
-        //   'page': this.page,
-        //   'limit': this.limit,
-        //   'searchObj': this.searchObj
+        //   'CustomerQuery': this.searchObj
         // })
       }).then(({data}) => {
         console.log(data)
@@ -120,6 +157,44 @@ export default {
           this.totalPage = 0
         }
         this.dataListLoading = false
+      })
+    },
+    removeDataById (id) {
+    // debugger
+      this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        console.log(id)
+        return this.$http({
+          url: this.$http.adornUrl(`/hotel/customer/${id}`),
+          method: 'delete'
+        })
+      }).then(() => {
+        this.fetchData()
+        this.$message({
+          type: 'success',
+          message: '删除成功!'
+        })
+      }).catch((response) => { // 失败
+        if (response === 'cancel') {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        } else {
+          this.$message({
+            type: 'error',
+            message: '删除失败'
+          })
+        }
+      })
+    },
+    addOrUpdateHandle (id) {
+      this.addOrUpdateVisible = true
+      this.$nextTick(() => {
+        this.$refs.addOrUpdate.init(id)
       })
     }
   }
