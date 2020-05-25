@@ -53,7 +53,7 @@
     methods: {
       init (id) {
         this.id = id
-        this.dataForm.customerId = id || 0
+        this.dataForm.customerId = id || ''
         // this.$http({
         //   url: this.$http.adornUrl(`/hotel/customer/list`),
         //   method: 'get',
@@ -65,7 +65,6 @@
         this.$nextTick(() => {
           console.log(this.$refs['dataForm'].resetFields())
           this.$refs['dataForm'].resetFields()
-          this.id = 0
         })
         if (this.dataForm.customerId) {
           this.$http({
