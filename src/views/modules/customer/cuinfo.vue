@@ -19,12 +19,14 @@
           type="datetime"
           placeholder="选择日期时间"
           align="right"
-          :picker-options="pickerOptions">
+          :picker-options="pickerOptions"
+          value-format="yyyy-MM-dd HH:mm:ss">
         </el-date-picker>
       </el-form-item>
 
       <el-button type="primary" icon="el-icon-search" @click="fetchData()">查询</el-button>
-      <el-button type="default" >清空</el-button>
+      <el-button type="default" @click="resetData()">清空</el-button>
+      <el-button  type="primary" @click="addOrUpdateHandle()">新增</el-button>
     </el-form>
   <el-table
     :data="list"
@@ -69,7 +71,7 @@
      <el-table-column label="操作" width="200" align="center">
         <template slot-scope="scope">
           <!-- <router-link :to="'/cutomer/edit/'+scope.row.customerId"> -->
-            <el-button type="primary" size="mini" icon="el-icon-edit" @click="addOrUpdateHandle(scope.row.customerId)">修改</el-button>
+            <el-button  type="primary" size="mini" icon="el-icon-edit" @click="addOrUpdateHandle(scope.row.customerId)">修改</el-button>
           <!-- </router-link> -->
           <el-button type="danger" size="mini" icon="el-icon-delete" @click="removeDataById(scope.row.customerId)">删除</el-button>
         </template>
@@ -158,6 +160,10 @@ export default {
         }
         this.dataListLoading = false
       })
+    },
+    resetData () {
+      this.searchObj = {}
+      this.fetchData()
     },
     removeDataById (id) {
     // debugger

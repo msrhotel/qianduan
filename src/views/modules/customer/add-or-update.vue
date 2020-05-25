@@ -1,6 +1,6 @@
 <template>
   <el-dialog
-    :title="!dataForm.cutomerId ? '新增' : '修改'"
+    :title="!id ? '新增' : '修改'"
     :close-on-click-modal="false"
     :visible.sync="visible">
     <el-form :model="dataForm" :rules="dataRule" ref="dataForm" @keyup.enter.native="dataFormSubmit()" label-width="80px">
@@ -34,10 +34,11 @@
   export default {
     data () {
       return {
+        id: 0,
         visible: false,
-        cutomerList: [],
+        // customerList: [],
         dataForm: {
-          cutomerId: 0,
+          customerId: 0,
           inRoom: '',
           inDate: '',
           outDate: '',
@@ -51,48 +52,48 @@
     },
     methods: {
       init (id) {
+        this.id = id
         this.dataForm.customerId = id || 0
-        this.$http({
-          url: this.$http.adornUrl(`/hotel/customer/${id}`),
-          method: 'get',
-          params: this.$http.adornParams()
-        }).then(({data}) => {
-          console.log(data)
-          this.cutomerList = data && data.code === 20000 ? data.data.item : []
-        }).then(() => {
-          this.visible = true
-          this.$nextTick(() => {
-            this.$refs['dataForm'].resetFields()
-          })
-        }).then(() => {
-          if (this.dataForm.customerId) {
-            this.$http({
-              url: this.$http.adornUrl(`/hotel/customer/${this.dataForm.customerId}`),
-              method: 'get',
-              params: this.$http.adornParams()
-            }).then(({data}) => {
-              console.log(data)
-              if (data && data.code === 20000) {
-                this.dataForm.customerId = data.data.item.customerId
-                this.dataForm.inRoom = data.data.item.inRoom
-                this.dataForm.inDate = data.data.item.inDate
-                this.dataForm.outDate = data.data.item.outDate
-                this.dataForm.customerRent = data.data.item.customerRent
-                this.dataForm.customerDeposit = data.data.item.customerDeposit
-              }
-            })
-          }
+        // this.$http({
+        //   url: this.$http.adornUrl(`/hotel/customer/list`),
+        //   method: 'get',
+        //   params: this.$http.adornParams()
+        // }).then(({data}) => {
+        //   this.customerList = data && data.code === 20000 ? data.data.cutomers : []
+        // }).then(() => {
+        this.visible = true
+        this.$nextTick(() => {
+          console.log(this.$refs['dataForm'].resetFields())
+          this.$refs['dataForm'].resetFields()
+          this.id = 0
         })
+        if (this.dataForm.customerId) {
+          this.$http({
+            url: this.$http.adornUrl(`/hotel/customer/${this.dataForm.customerId}`),
+            method: 'get',
+            params: this.$http.adornParams()
+          }).then(({data}) => {
+            console.log(data)
+            if (data && data.code === 20000) {
+              this.dataForm.customerId = data.data.item.customerId
+              this.dataForm.inRoom = data.data.item.inRoom
+              this.dataForm.inDate = data.data.item.inDate
+              this.dataForm.outDate = data.data.item.outDate
+              this.dataForm.customerRent = data.data.item.customerRent
+              this.dataForm.customerDeposit = data.data.item.customerDeposit
+            }
+          })
+        }
       },
       // 表单提交
       dataFormSubmit () {
         this.$refs['dataForm'].validate((valid) => {
           if (valid) {
             this.$http({
-              url: this.$http.adornUrl(`/renren-fast/sys/user/${!this.dataForm.customerId ? 'save' : 'update'}`),
+              url: this.$http.adornUrl(`/hotel/customer/${!this.id ? 'save' : 'update'}`),
               method: 'post',
               data: this.$http.adornData({
-                'customerId': this.dataForm.ustomerId || undefined,
+                'customerId': this.dataForm.customerId || undefined,
                 'inRoom': this.dataForm.inRoom,
                 'inDate': this.dataForm.inDate,
                 'outDate': this.dataForm.outDate,
