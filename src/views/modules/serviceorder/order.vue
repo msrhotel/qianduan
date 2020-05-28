@@ -11,12 +11,14 @@
         <el-button @click="fetchData()">查询</el-button>
         <el-button type="primary" @click="addOrUpdateHandle()">新增</el-button>
         <el-button type="default" @click="resetData()">清空</el-button>
+        <el-button type="danger" @click="deleteHandle()" :disabled="dataListSelections.length <= 0">批量删除</el-button>
       </el-form-item>
     </el-form>
     <el-table
       :data="dataList"
       border
-      
+      v-loading="dataListLoading"
+      @selection-change="selectionChangeHandle"
       style="width: 100%;">
       <el-table-column
         type="selection"
@@ -103,9 +105,9 @@
         dataList: [],
         total: 0, // 总记录数
         page: 1, // 页码
-        limit: 5, // 每页记录数
+        limit: 10, // 每页记录数
         searchObj: {}, // 查询条件
-        dataListLoading: true,
+        dataListLoading: false,
         dataListSelections: [],
         addOrUpdateVisible: false
       }
@@ -117,6 +119,7 @@
       this.fetchData()
     },
     methods: {
+      // 获取数据列表
       fetchData (page = 1) { // 调用api层获取数据库中的数据
         this.dataListLoading = true
         this.page = page
@@ -136,6 +139,7 @@
           this.dataListLoading = false
         })
       },
+      // 重置页面
       resetData () {
         this.searchObj = {}
         this.fetchData()
@@ -147,37 +151,45 @@
           this.$refs.addOrUpdate.init(id)
         })
       },
+      // 多选
+      selectionChangeHandle (val) {
+        this.dataListSelections = val
+      },
       // 删除
       deleteHandle (id) {
-        this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          console.log(id)
-          return this.$http({
-            url: this.$http.adornUrl(`/serviceorder/order/${id}`),
-            method: 'delete'
-          })
-        }).then(() => {
-          this.fetchData()
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          })
-        }).catch((response) => { // 失败
-          if (response === 'cancel') {
-            this.$message({
-              type: 'info',
-              message: '已取消删除'
-            })
-          } else {
-            this.$message({
-              type: 'error',
-              message: '删除失败'
-            })
-          }
+        var orderIds = id ? [id] : this.dataListSelections.map(item => {
+          return item.orderId
         })
+        for (id in orderIds) {
+          this.$confirm(`确定对[id=${orderIds.join(',')}]进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            return this.$http({
+              url: this.$http.adornUrl(`/serviceorder/order/${id}`),
+              method: 'delete'
+            })
+          }).then(() => {
+            this.fetchData()
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+          }).catch((response) => { // 失败
+            if (response === 'cancel') {
+              this.$message({
+                type: 'info',
+                message: '已取消删除'
+              })
+            } else {
+              this.$message({
+                type: 'error',
+                message: '删除失败'
+              })
+            }
+          }).catch(() => {})
+        }
       }
     }
   }
