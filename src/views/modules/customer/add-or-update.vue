@@ -51,6 +51,7 @@
     },
     methods: {
       init (id) {
+<<<<<<< HEAD
         this.dataForm.customerId = id || 0
         this.$http({
           url: this.$http.adornUrl(`/hotel/customer/${id}`),
@@ -63,6 +64,37 @@
           this.visible = true
           this.$nextTick(() => {
             this.$refs['dataForm'].resetFields()
+=======
+        this.id = id
+        this.dataForm.customerId = id || ''
+        // this.$http({
+        //   url: this.$http.adornUrl(`/hotel/customer/list`),
+        //   method: 'get',
+        //   params: this.$http.adornParams()
+        // }).then(({data}) => {
+        //   this.customerList = data && data.code === 20000 ? data.data.cutomers : []
+        // }).then(() => {
+        this.visible = true
+        this.$nextTick(() => {
+          console.log(this.$refs['dataForm'].resetFields())
+          this.$refs['dataForm'].resetFields()
+        })
+        if (this.dataForm.customerId) {
+          this.$http({
+            url: this.$http.adornUrl(`/hotel/customer/${this.dataForm.customerId}`),
+            method: 'get',
+            params: this.$http.adornParams()
+          }).then(({data}) => {
+            console.log(data)
+            if (data && data.code === 20000) {
+              this.dataForm.customerId = data.data.item.customerId
+              this.dataForm.inRoom = data.data.item.inRoom
+              this.dataForm.inDate = data.data.item.inDate
+              this.dataForm.outDate = data.data.item.outDate
+              this.dataForm.customerRent = data.data.item.customerRent
+              this.dataForm.customerDeposit = data.data.item.customerDeposit
+            }
+>>>>>>> bfdf61b6d1c133f51adad0ba641e325f5bb8915c
           })
         }).then(() => {
           if (this.dataForm.customerId) {
