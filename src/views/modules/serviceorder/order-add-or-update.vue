@@ -10,11 +10,12 @@
         <el-input v-model="dataForm.orderId" placeholder="订单ID"></el-input>
       </el-form-item>
       <el-form-item label="身份证号" prop="customerId">
+        <!-- <el-input v-model="dataForm.customerId" placeholder="身份证号"></el-input>  -->
         <el-select v-model="dataForm.customerId" placeholder="身份证号">
           <el-option
-            v-for="item in options1"
+            v-for="item in slist"
             :key="item.value"
-            :label="item.label"
+            :label="item.label+' '+item.value"
             :value="item.value"
           ></el-option>
         </el-select>
@@ -47,7 +48,9 @@
 </template>
 
 <script>
+import cusinfo from '@/views/modules/customerinfo/cusinfo'
 export default {
+  components: { cusinfo },
   data () {
     return {
       id: 0,
@@ -55,16 +58,27 @@ export default {
       dataForm: {
         orderId: '',
         customerId: 0,
-        customerName: '',
         orderDays: 0,
         orderType: 0,
         inDate: '',
         outDate: ''
       },
-      options1: [
+      slist: [
         {
-          value: 123,
-          label: '身份证号'
+          value: 111111111222222222,
+          label: '王二'
+        },
+        {
+          value: 123456123456123456,
+          label: '李四'
+        },
+        {
+          value: 123456789123456789,
+          label: '张三'
+        },
+        {
+          value: 444555666777888999,
+          label: '大西瓜'
         }
       ],
       options: [
@@ -81,7 +95,6 @@ export default {
           label: '总统套房'
         }
       ],
-      value: 0,
       dataRule: {
         //     userName: [
         //       { required: true, message: '用户名不能为空', trigger: 'blur' }
@@ -103,14 +116,22 @@ export default {
       }
     }
   },
-  activated () {
-    this.getIdName()
-  },
   methods: {
+
     init (id) {
       this.id = id
       this.dataForm.orderId = id || ''
       this.visible = true
+      // this.$http({
+      //   url: this.$http.adornUrl(`/servicecustomerinfo/hotel-customerinfo/list`),
+      //   method: 'get',
+      //   params: this.$http.adornParams({})
+      // }).then(({data}) => {
+      //   this.slist = data.data.rows
+      //   console.log(data)
+      //   this.customerId = this.slist.customerId
+      //   this.customerName = this.slist.customerName
+      // })
       this.$nextTick(() => {
         this.$refs['dataForm'].resetFields()
       })
@@ -133,14 +154,14 @@ export default {
         })
       }
     },
-    // 表单提交
+  // 表单提交
     dataFormSubmit () {
       this.$refs['dataForm'].validate(valid => {
         if (valid) {
           this.$http({
             url: this.$http.adornUrl(
-              `/serviceorder/order/${!this.id ? 'save' : 'update'}`
-            ),
+            `/serviceorder/order/${!this.id ? 'save' : 'update'}`
+          ),
             method: 'post',
             data: this.$http.adornData({
               orderId: this.dataForm.orderId || undefined,
@@ -166,18 +187,6 @@ export default {
             }
           })
         }
-      })
-    },
-    getIdName () {
-      this.$http({
-        url: this.$http.adornUrl(
-          '/servicecustomerinfo/hotel-customerinfo/list'
-        ),
-        method: 'get',
-        data: this.$http.adornData({
-          customerId: this.list.customerId,
-          customerName: this.list.customerName
-        })
       })
     }
   }

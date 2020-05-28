@@ -157,40 +157,41 @@
       },
       // 删除
       deleteHandle (id) {
-        var orderIds = id ? [id] : this.dataListSelections.map(item => {
-          return item.orderId
-        })
-        for (id in orderIds) {
-          this.$confirm(`确定对[id=${orderIds.join(',')}]进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }).then(() => {
-            return this.$http({
-              url: this.$http.adornUrl(`/serviceorder/order/${id}`),
-              method: 'delete'
-            })
-          }).then(() => {
-            this.fetchData()
+        // var orderIds = id ? [id] : this.dataListSelections.map(item => {
+        //   return item.orderId
+        // })
+        // for (id in orderIds) {
+        // this.$confirm(`确定对[id=${orderIds.join(',')}]进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
+        this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          return this.$http({
+            url: this.$http.adornUrl(`/serviceorder/order/${id}`),
+            method: 'delete'
+          })
+        }).then(() => {
+          this.fetchData()
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          })
+        }).catch((response) => { // 失败
+          if (response === 'cancel') {
             this.$message({
-              type: 'success',
-              message: '删除成功!'
+              type: 'info',
+              message: '已取消删除'
             })
-          }).catch((response) => { // 失败
-            if (response === 'cancel') {
-              this.$message({
-                type: 'info',
-                message: '已取消删除'
-              })
-            } else {
-              this.$message({
-                type: 'error',
-                message: '删除失败'
-              })
-            }
-          }).catch(() => {})
-        }
+          } else {
+            this.$message({
+              type: 'error',
+              message: '删除失败'
+            })
+          }
+        })
       }
     }
   }
+  // }
 </script>

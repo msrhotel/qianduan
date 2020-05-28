@@ -114,7 +114,7 @@ export default {
       }).then(({data}) => {
         console.log(data)
         if (data && data.code === 20000) {
-          this.list = data.data.rows
+          this.list = data.data.list
           this.total = data.data.total
           console.log(this.list)
         } else {
